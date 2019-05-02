@@ -4,8 +4,8 @@
 
 若要在此文件夹中运行已完成的项目, 您需要以下各项:
 
-- 安装在开发计算机上的[Android Studio](https://developer.android.com/studio/) 。 (**注意:** 本教程是使用 android Studio 版本3.3.1 在 1.8.0 JRE 和 Android 9.0 SDK 中编写的。 本指南中的步骤可能适用于其他版本, 但尚未经过测试。
-- 使用 Outlook.com 上的邮箱的个人 Microsoft 帐户, 或者是 microsoft 工作或学校帐户。
+- 安装在开发计算机上的[Android Studio](https://developer.android.com/studio/) 。 (**注意:** 本教程是使用 android Studio 版本3.3.1 在 1.8.0 JRE 和 ANDROID 9.0 SDK 中编写的。 本指南中的步骤可能适用于其他版本, 但尚未经过测试。
+- 使用 Outlook.com 上的邮箱的个人 Microsoft 帐户, 或者是 Microsoft 工作或学校帐户。
 
 如果你没有 Microsoft 帐户, 可以使用以下几种方法获取免费帐户:
 
@@ -16,7 +16,7 @@
 
 1. 打开浏览器，并转到 [Azure Active Directory 管理中心](https://aad.portal.azure.com)。然后，使用**个人帐户**（亦称为“Microsoft 帐户”）或**工作或学校帐户**登录。
 
-1. 选择左侧导航栏中的“Azure Active Directory”****，再选择“管理”**** 下的“应用注册(预览版)”****。
+1. 在左侧导航栏中选择 " **Azure Active Directory** ", 然后选择 "**管理**" 下的 "**应用程序注册**"。
 
     ![应用注册的屏幕截图 ](../../tutorial/images/aad-portal-app-registrations.png)
 
@@ -34,7 +34,7 @@
 
 1. 选择 "**添加重定向 URI** " 链接。 在 "**重定向 uri** " 页上, 找到 "**公共客户端 (移动、桌面)** " 部分的 "建议的重定向 uri" 部分。 选择以开头`msal`和复制的 URI, 然后选择 "**保存**"。 保存复制的重定向 URI, 在下一步中将需要它。
 
-    !["重定向 uri" 页的屏幕截图](../../tutorial/images/aad-redirect-uris.png)
+    !["重定向 Uri" 页的屏幕截图](../../tutorial/images/aad-redirect-uris.png)
 
 ## <a name="run-the-sample"></a>运行示例
 
