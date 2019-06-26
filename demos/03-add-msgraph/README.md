@@ -28,7 +28,7 @@
 
     !["注册应用程序" 页的屏幕截图](../../tutorial/images/aad-register-an-app.png)
 
-1. 选择“注册”****。 在 " **Xamarin Graph 教程**" 页上, 复制**应用程序 (客户端) ID**的值并保存它, 下一步将需要它。
+1. 选择 "**注册**"。 在 " **Xamarin Graph 教程**" 页上, 复制**应用程序 (客户端) ID**的值并保存它, 下一步将需要它。
 
     ![新应用注册的应用程序 ID 的屏幕截图](../../tutorial/images/aad-application-id.png)
 
