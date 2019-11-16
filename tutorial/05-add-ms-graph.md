@@ -1,12 +1,12 @@
 <!-- markdownlint-disable MD002 MD041 -->
 
-在本练习中, 将把 Microsoft Graph 合并到应用程序中。 对于此应用程序, 您将使用[适用于 Java 的 Microsoft GRAPH SDK](https://github.com/microsoftgraph/msgraph-sdk-java)调用 microsoft graph。
+在本练习中，将把 Microsoft Graph 合并到应用程序中。 对于此应用程序，您将使用[适用于 Java 的 Microsoft GRAPH SDK](https://github.com/microsoftgraph/msgraph-sdk-java)调用 microsoft graph。
 
 ## <a name="get-calendar-events-from-outlook"></a>从 Outlook 获取日历事件
 
-在本节中, 您将扩展`GraphHelper`类以添加一个函数, 以获取用户的事件并更新`CalendarFragment`以使用这些新函数。
+在本节中，您将扩展`GraphHelper`类以添加一个函数，以获取用户的事件并更新`CalendarFragment`以使用这些新函数。
 
-1. 打开**microsoft.windowsazure.activedirectory.graphhelper**文件, 并将以下`import`语句添加到文件顶部。
+1. 打开**microsoft.windowsazure.activedirectory.graphhelper**文件，并将以下`import`语句添加到文件顶部。
 
     ```java
     import com.microsoft.graph.options.Option;
@@ -46,7 +46,7 @@
     >
     > - 将调用的 URL 为`/v1.0/me/events`。
     > - `select`函数将为每个事件返回的字段限制为只 > 视图实际使用的字段。
-    > - `QueryOption`指定的`orderby`名称用于按创建日期和时间对结果进行排序, 最新项目最先开始。
+    > - `QueryOption`指定的`orderby`名称用于按创建日期和时间对结果进行排序，最新项目最先开始。
 
 1. 将以下`import`语句添加到**CalendarFragment**文件的顶部。
 
@@ -59,7 +59,7 @@
     import com.microsoft.graph.models.extensions.Event;
     import com.microsoft.graph.requests.extensions.IEventCollectionPage;
     import com.microsoft.identity.client.AuthenticationCallback;
-    import com.microsoft.identity.client.AuthenticationResult;
+    import com.microsoft.identity.client.IAuthenticationResult;
     import com.microsoft.identity.client.exception.MsalException;
     import java.util.List;
     ```
@@ -71,7 +71,7 @@
     private ProgressBar mProgress = null;
     ```
 
-1. 将以下函数添加到`CalendarFragment`类中, 以隐藏和显示进度栏, 以及在中`getEvents` `GraphHelper`为函数提供回调。
+1. 将以下函数添加到`CalendarFragment`类中，以隐藏和显示进度栏，以及在中`getEvents` `GraphHelper`为函数提供回调。
 
     ```java
     private void showProgressBar() {
@@ -114,7 +114,7 @@
     }
     ```
 
-1. 重写`onCreate` `GraphHelper`类中的函数, 以从 Microsoft Graph 中获取用户的事件。
+1. 重写`onCreate` `CalendarFragment`类中的函数，以从 Microsoft Graph 中获取用户的事件。
 
     ```java
     @Override
@@ -128,7 +128,7 @@
         AuthenticationHelper.getInstance()
                 .acquireTokenSilently(new AuthenticationCallback() {
                     @Override
-                    public void onSuccess(AuthenticationResult authenticationResult) {
+                    public void onSuccess(IAuthenticationResult authenticationResult) {
                         final GraphHelper graphHelper = GraphHelper.getInstance();
 
                         // Get the user's events
@@ -150,17 +150,17 @@
     }
     ```
 
-请注意此代码执行的操作。 首先, 它调用`acquireTokenSilently`以获取访问令牌。 每次需要访问令牌时调用此方法是一种最佳做法, 因为它充分利用 MSAL 的缓存和令牌刷新能力。 在内部, MSAL 检查缓存的令牌, 然后检查它是否已过期。 如果令牌存在且未过期, 它只返回缓存的令牌。 如果已过期, 则它会在返回之前尝试刷新令牌。
+请注意此代码执行的操作。 首先，它调用`acquireTokenSilently`以获取访问令牌。 每次需要访问令牌时调用此方法是一种最佳做法，因为它充分利用 MSAL 的缓存和令牌刷新能力。 在内部，MSAL 检查缓存的令牌，然后检查它是否已过期。 如果令牌存在且未过期，它只返回缓存的令牌。 如果已过期，则它会在返回之前尝试刷新令牌。
 
-检索到令牌后, 代码将调用`getEvents`方法以获取用户的事件。
+检索到令牌后，代码将调用`getEvents`方法以获取用户的事件。
 
-您现在可以运行应用程序, 登录, 然后点击菜单中的 "**日历**" 导航项。 您应该会在 Android Studio 的调试日志中看到事件的 JSON 转储。
+您现在可以运行应用程序，登录，然后点击菜单中的 "**日历**" 导航项。 您应该会在 Android Studio 的调试日志中看到事件的 JSON 转储。
 
 ## <a name="display-the-results"></a>显示结果
 
-现在, 您可以将 JSON 转储替换为以用户友好的方式显示结果的内容。 在本节中, 您将向日历`ListView`片段中添加一个, 为`ListView`中的每个项目创建一个布局, 并为其创建自定义列表`ListView`适配器, 以便将每个`Event`字段的字段`TextView`映射到视图中的相应字段。
+现在，您可以将 JSON 转储替换为以用户友好的方式显示结果的内容。 在本节中，您将向日历`ListView`片段中添加一个，为`ListView`中的每个项目创建一个布局，并为其创建自定义列表`ListView`适配器，以便将每个`Event`字段的字段`TextView`映射到视图中的相应字段。
 
-1. 将`TextView` `ListView`in **app/res/layout/fragment_calendar/.xml**替换为。
+1. 将`TextView` in **app/res/layout/fragment_calendar .xml**替换为`ListView`。
 
     ```xml
     <ListView
@@ -171,11 +171,11 @@
         android:dividerHeight="1dp" />
     ```
 
-1. 右键单击 "**应用/分辨率/布局**" 文件夹, 然后选择 "**新建**", 然后选择 "**布局资源文件**"。
+1. 右键单击 "**应用/分辨率/布局**" 文件夹，然后选择 "**新建**"，然后选择 "**布局资源文件**"。
 
-1. 将文件`event_list_item`命名, 将**根元素**更改为`RelativeLayout`, 然后选择 **"确定"**。
+1. 将文件`event_list_item`命名，将**根元素**更改为`RelativeLayout`，然后选择 **"确定"**。
 
-1. 打开 " **event_list_item** " 文件, 并将其内容替换为以下内容。
+1. 打开**event_list_item .xml**文件，并将其内容替换为以下内容。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -239,26 +239,24 @@
     </RelativeLayout>
     ```
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹, 然后选择 "**新建**", 然后依次选择 " **java 类**"。
+1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。
 
 1. 命名该类`EventListAdapter`并选择 **"确定"**。
 
-1. 打开 " **EventListAdapter** " 文件, 并将其内容替换为以下内容。
+1. 打开 " **EventListAdapter** " 文件，并将其内容替换为以下内容。
 
     ```java
     package com.example.graphtutorial;
 
     import android.content.Context;
-    import android.support.annotation.NonNull;
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
     import android.widget.ArrayAdapter;
     import android.widget.TextView;
-
+    import androidx.annotation.NonNull;
     import com.microsoft.graph.models.extensions.DateTimeTimeZone;
     import com.microsoft.graph.models.extensions.Event;
-
     import java.time.LocalDateTime;
     import java.time.ZoneId;
     import java.time.ZonedDateTime;
@@ -332,7 +330,7 @@
     }
     ```
 
-1. 打开**CalendarFragment**类, 并将以下函数添加到类中。
+1. 打开**CalendarFragment**类，并将以下函数添加到类中。
 
     ```java
     private void addEventsToList() {
@@ -356,6 +354,6 @@
     addEventsToList();
     ```
 
-1. 运行应用程序, 登录, 然后点击 "**日历**" 导航项。 您应该会看到事件列表。
+1. 运行应用程序，登录，然后点击 "**日历**" 导航项。 您应该会看到事件列表。
 
     ![事件表的屏幕截图](./images/calendar-list.png)

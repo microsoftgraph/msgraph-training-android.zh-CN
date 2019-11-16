@@ -2,41 +2,38 @@
 
 首先创建一个新的 Android Studio 项目。
 
-1. 打开 Android Studio, 并在欢迎屏幕上选择 "**启动新的 Android studio 项目**"。
+1. 打开 Android Studio，并在欢迎屏幕上选择 "**启动新的 Android studio 项目**"。
 
-1. 在 "**新建项目**" 对话框中, 选择 "**空活动**", 然后选择 "**下一步**"。
+1. 在 "**新建项目**" 对话框中，选择 "**空活动**"，然后选择 "**下一步**"。
 
     ![Android Studio 中的 "新建项目" 对话框的屏幕截图](./images/choose-project.png)
 
-1. 在 "**配置项目**" 对话框中, 将**** "名称`Graph Tutorial`" 设置为, 确保 "**语言**" `Java`字段设置为, 并确保将 "**最小 API" 级别**设置为`API 27: Android 8.1 (Oreo)`。 根据需要修改**包名称**和**保存位置**。 选择“完成”****。
+1. 在 "**配置项目**" 对话框中，将**** "名称`Graph Tutorial`" 设置为，确保 "**语言**" `Java`字段设置为，并确保将 "**最小 API" 级别**设置为`API 29: Android 10.0 (Q)`。 根据需要修改**包名称**和**保存位置**。 选择“完成”****。
 
     !["配置项目" 对话框的屏幕截图](./images/configure-project.png)
 
 > [!IMPORTANT]
-> 确保为在这些实验室说明中指定的项目输入完全相同的名称。 项目名称将成为代码中的命名空间的一部分。 这些指令中的代码取决于与这些说明中指定的项目名称匹配的命名空间。 如果使用其他项目名称, 则代码将不会编译, 除非您调整所有命名空间以匹配您在创建项目时输入的项目名称。
+> 本教程中的代码和说明使用程序包名称**graphtutorial**。 如果您在创建项目时使用不同的包名称，请务必使用您的程序包名称，无论您何时看到此值。
 
 ## <a name="install-dependencies"></a>安装依赖项
 
-在继续之前, 请安装稍后将使用的一些其他依赖项。
+在继续之前，请安装稍后将使用的一些其他依赖项。
 
-- `com.android.support:design`使导航抽屉布局对应用程序可用。
-- [适用于 Android 的 Microsoft 身份验证库 (MSAL)](https://github.com/AzureAD/microsoft-authentication-library-for-android)来处理 Azure AD 身份验证和令牌管理。
-- [Microsoft GRAPH SDK For Java](https://github.com/microsoftgraph/msgraph-sdk-java) , 用于调用 microsoft graph。
+- `com.google.android.material:material`使[导航视图](https://material.io/develop/android/components/navigation-view/)对应用程序可用。
+- [适用于 Android 的 Microsoft 身份验证库（MSAL）](https://github.com/AzureAD/microsoft-authentication-library-for-android)来处理 Azure AD 身份验证和令牌管理。
+- [Microsoft GRAPH SDK For Java](https://github.com/microsoftgraph/msgraph-sdk-java) ，用于调用 microsoft graph。
 
-1. 展开 " **Gradle 脚本**", 然后打开 " **Gradle" (Module: app)** 文件。
+1. 展开 " **Gradle 脚本**"，然后打开 " **Gradle" （Module： app）** 文件。
 
 1. 在`dependencies`值中添加以下行。
 
     ```Gradle
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.microsoft.graph:microsoft-graph:1.4.0'
-    implementation 'com.microsoft.identity.client:msal:0.2.2'
+    implementation 'com.google.android.material:material:1.0.0'
+    implementation 'com.microsoft.identity.client:msal:1.0.0'
+    implementation 'com.microsoft.graph:microsoft-graph:1.6.0'
     ```
 
-    > [!NOTE]
-    > 如果使用的是不同的 SDK 版本, 请务必将更改`28.0.0`为与**gradle**中已存在的`com.android.support:appcompat-v7`依赖项版本相匹配。
-
-1. 在`packagingOptions` **gradle (Module: app)** 文件中的值的`android`内部添加一个。
+1. 在`packagingOptions` **gradle （Module： app）** 文件中的`android`值内添加值。
 
     ```Gradle
     packagingOptions {
@@ -44,23 +41,23 @@
     }
     ```
 
-1. 保存所做的更改。 在 "**文件**" 菜单上, 选择 "**使用 Gradle 文件同步项目**"。
+1. 保存所做的更改。 在 "**文件**" 菜单上，选择 "**使用 Gradle 文件同步项目**"。
 
 ## <a name="design-the-app"></a>设计应用程序
 
-应用程序将使用[导航抽屉](https://developer.android.com/training/implementing-navigation/nav-drawer)在不同视图之间导航。 在此步骤中, 将更新活动以使用导航抽屉版式, 并为视图添加片段。
+应用程序将使用导航抽屉在不同视图之间导航。 在此步骤中，将更新活动以使用导航抽屉版式，并为视图添加片段。
 
 ### <a name="create-a-navigation-drawer"></a>创建导航抽屉
 
-在本节中, 您将为应用的导航菜单创建图标, 为应用程序创建菜单, 并更新应用程序的主题和布局以与导航抽屉兼容。
+在本节中，您将为应用的导航菜单创建图标，为应用程序创建菜单，并更新应用程序的主题和布局以与导航抽屉兼容。
 
 #### <a name="create-icons"></a>创建图标
 
-1. 右键单击 " **app/res/可以绘制**" 文件夹, 然后选择 "**新建**", 然后选择 "**矢量资产**"。
+1. 右键单击 " **app/res/可以绘制**" 文件夹，然后选择 "**新建**"，然后选择 "**矢量资产**"。
 
 1. 单击 "**剪贴画**" 旁边的 "图标" 按钮。
 
-1. 在 "**选择图标**" 窗口中`home` , 键入搜索栏, 然后选择 "**主页**" 图标, 然后选择 **"确定"**。
+1. 在 "**选择图标**" 窗口中`home` ，键入搜索栏，然后选择 "**主页**" 图标，然后选择 **"确定"**。
 
 1. 将**名称**更改为`ic_menu_home`。
 
@@ -70,21 +67,21 @@
 
 1. 重复上一步以创建其他三个图标。
 
-    - 名称: `ic_menu_calendar`, 图标:`event`
-    - 名称: `ic_menu_signout`, 图标:`exit to app`
-    - 名称: `ic_menu_signin`, 图标:`person add`
+    - 名称： `ic_menu_calendar`，图标：`event`
+    - 名称： `ic_menu_signout`，图标：`exit to app`
+    - 名称： `ic_menu_signin`，图标：`person add`
 
 #### <a name="create-the-menu"></a>创建菜单
 
-1. 右键单击 " **res** " 文件夹, 然后选择 "**新建**", 然后选择 " **Android 资源目录**"。
+1. 右键单击 " **res** " 文件夹，然后选择 "**新建**"，然后选择 " **Android 资源目录**"。
 
-1. 将**资源类型**更改为`menu` , 然后选择 **"确定"**。
+1. 将**资源类型**更改为`menu` ，然后选择 **"确定"**。
 
-1. 右键单击新的**菜单**文件夹, 然后选择 "**新建**", 然后选择 "**菜单资源文件**"。
+1. 右键单击新的**菜单**文件夹，然后选择 "**新建**"，然后选择 "**菜单资源文件**"。
 
-1. 命名该文件`drawer_menu` , 然后选择 **"确定"**。
+1. 命名该文件`drawer_menu` ，然后选择 **"确定"**。
 
-1. 打开文件时, 选择 "**文本**" 选项卡以查看 XML, 然后将整个内容替换为以下内容。
+1. 打开文件时，选择 "**文本**" 选项卡以查看 XML，然后将整个内容替换为以下内容。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -123,7 +120,7 @@
 
 #### <a name="update-application-theme-and-layout"></a>更新应用程序主题和布局
 
-1. 打开 "**应用程序/res/values/styles** " 文件, 并`Theme.AppCompat.Light.DarkActionBar`将`Theme.AppCompat.Light.NoActionBar`替换为。
+1. 打开 "**应用程序/res/values/styles** " 文件，并`Theme.AppCompat.Light.DarkActionBar`将`Theme.AppCompat.Light.NoActionBar`替换为。
 
 1. 在`style`元素内添加以下行。
 
@@ -135,11 +132,11 @@
 
 1. 右键单击 "**应用程序/分辨率/布局**" 文件夹。
 
-1. 选择 "**新建**", 然后选择 "**布局资源文件**"。
+1. 选择 "**新建**"，然后选择 "**布局资源文件**"。
 
-1. 将文件`nav_header`命名并将**根元素**更改为`LinearLayout`, 然后选择 **"确定"**。
+1. 将文件`nav_header`命名并将**根元素**更改为`LinearLayout`，然后选择 **"确定"**。
 
-1. 打开**nav_header**文件并选择 "**文本**" 选项卡。将整个内容替换为以下内容。
+1. 打开**nav_header .xml**文件，然后选择 "**文本**" 选项卡。将整个内容替换为以下内容。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -175,11 +172,11 @@
     </LinearLayout>
     ```
 
-1. 通过将现有 XML 替换为以下项, 打开**app/res/layout/activity_main**文件`DrawerLayout`并将布局更新为 a。
+1. 通过将现有的 XML 替换为以下项，打开**应用程序/res/layout/activity_main .xml**文件并将布局更新为 a `DrawerLayout` 。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
-    <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/drawer_layout"
@@ -201,7 +198,7 @@
                 android:layout_centerInParent="true"
                 android:visibility="gone"/>
 
-            <android.support.v7.widget.Toolbar
+            <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
@@ -216,7 +213,7 @@
                 android:layout_below="@+id/toolbar" />
         </RelativeLayout>
 
-        <android.support.design.widget.NavigationView
+        <com.google.android.material.navigation.NavigationView
             android:id="@+id/nav_view"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -224,7 +221,7 @@
             app:headerLayout="@layout/nav_header"
             app:menu="@menu/drawer_menu" />
 
-    </android.support.v4.widget.DrawerLayout>
+    </androidx.drawerlayout.widget.DrawerLayout>
     ```
 
 1. 打开**应用程序/res/values/strings**并在`resources`元素中添加以下元素。
@@ -234,25 +231,25 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
     ```
 
-1. 打开**app/java/com 示例/graphtutorial/MainActivity**文件, 并将整个内容替换为以下内容。
+1. 打开**app/java/com 示例/graphtutorial/MainActivity**文件，并将整个内容替换为以下内容。
 
     ```java
     package com.example.graphtutorial;
 
-    import android.support.annotation.NonNull;
-    import android.support.design.widget.NavigationView;
-    import android.support.v4.view.GravityCompat;
-    import android.support.v4.widget.DrawerLayout;
-    import android.support.v7.app.ActionBarDrawerToggle;
-    import android.support.v7.app.AppCompatActivity;
     import android.os.Bundle;
-    import android.support.v7.widget.Toolbar;
     import android.view.Menu;
     import android.view.MenuItem;
     import android.view.View;
     import android.widget.FrameLayout;
     import android.widget.ProgressBar;
     import android.widget.TextView;
+    import androidx.annotation.NonNull;
+    import androidx.appcompat.app.ActionBarDrawerToggle;
+    import androidx.appcompat.app.AppCompatActivity;
+    import androidx.appcompat.widget.Toolbar;
+    import androidx.core.view.GravityCompat;
+    import androidx.drawerlayout.widget.DrawerLayout;
+    import com.google.android.material.navigation.NavigationView;
 
     public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
         private DrawerLayout mDrawer;
@@ -355,13 +352,13 @@
 
 ### <a name="add-fragments"></a>添加片段
 
-在本节中, 您将为 "主页" 和 "日历" 视图创建片段。
+在本节中，您将为 "主页" 和 "日历" 视图创建片段。
 
-1. 右键单击 "**应用/分辨率/布局**" 文件夹, 然后选择 "**新建**", 然后选择 "**布局资源文件**"。
+1. 右键单击 "**应用/分辨率/布局**" 文件夹，然后选择 "**新建**"，然后选择 "**布局资源文件**"。
 
-1. 将文件`fragment_home`命名并将**根元素**更改为`RelativeLayout`, 然后选择 **"确定"**。
+1. 将文件`fragment_home`命名并将**根元素**更改为`RelativeLayout`，然后选择 **"确定"**。
 
-1. 打开 " **fragment_home** " 文件, 并将其内容替换为以下内容。
+1. 打开**fragment_home .xml**文件，并将其内容替换为以下内容。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -395,11 +392,11 @@
     </RelativeLayout>
     ```
 
-1. 右键单击 "**应用/分辨率/布局**" 文件夹, 然后选择 "**新建**", 然后选择 "**布局资源文件**"。
+1. 右键单击 "**应用/分辨率/布局**" 文件夹，然后选择 "**新建**"，然后选择 "**布局资源文件**"。
 
-1. 将文件`fragment_calendar`命名并将**根元素**更改为`RelativeLayout`, 然后选择 **"确定"**。
+1. 将文件`fragment_calendar`命名并将**根元素**更改为`RelativeLayout`，然后选择 **"确定"**。
 
-1. 打开 " **fragment_calendar** " 文件, 并将其内容替换为以下内容。
+1. 打开**fragment_calendar .xml**文件，并将其内容替换为以下内容。
 
     ```xml
     <?xml version="1.0" encoding="utf-8"?>
@@ -417,11 +414,11 @@
     </RelativeLayout>
     ```
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹, 然后选择 "**新建**", 然后依次选择 " **java 类**"。
+1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。
 
-1. 命名该类`HomeFragment`并将**超类**设置为`android.support.v4.app.Fragment`, 然后选择 **"确定"**。
+1. 命名该类`HomeFragment`并将**超类**设置为`androidx.fragment.app.Fragment`，然后选择 **"确定"**。
 
-1. 打开 " **HomeFragment** " 文件, 并将其内容替换为以下内容。
+1. 打开 " **HomeFragment** " 文件，并将其内容替换为以下内容。
 
     ```java
     package com.example.graphtutorial;
@@ -478,21 +475,34 @@
     }
     ```
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹, 然后选择 "**新建**", 然后依次选择 " **java 类**"。
+1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。
 
-1. 命名该类`CalendarFragment`并将**超类**设置为`android.support.v4.app.Fragment`, 然后选择 **"确定"**。
+1. 命名该类`CalendarFragment`并将**超类**设置为`androidx.fragment.app.Fragment`，然后选择 **"确定"**。
 
-1. 打开 " **CalendarFragment** " 文件, 并将以下函数添加`CalendarFragment`到类中。
+1. 打开 " **CalendarFragment** " 文件，并将其内容替换为以下内容。
 
     ```java
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_calendar, container, false);
+    package com.example.graphtutorial;
+
+    import android.os.Bundle;
+    import android.view.LayoutInflater;
+    import android.view.View;
+    import android.view.ViewGroup;
+    import androidx.annotation.NonNull;
+    import androidx.annotation.Nullable;
+    import androidx.fragment.app.Fragment;
+
+    public class CalendarFragment extends Fragment {
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            return inflater.inflate(R.layout.fragment_calendar, container, false);
+        }
     }
     ```
 
-1. 打开**MainActivity**文件, 并将以下函数添加到类中。
+1. 打开**MainActivity**文件，并将以下函数添加到类中。
 
     ```java
     // Load the "Home" fragment
@@ -550,7 +560,7 @@
     }
     ```
 
-1. 在该`onCreate`函数的末尾添加以下内容, 以在应用程序启动时加载主片段。
+1. 在该`onCreate`函数的末尾添加以下内容，以在应用程序启动时加载主片段。
 
     ```java
     // Load the home fragment by default on startup
@@ -561,8 +571,8 @@
 
 1. 保存所有更改。
 
-1. 在 "**运行**" 菜单上, 选择 **"运行 ' 应用 '"**。
+1. 在 "**运行**" 菜单上，选择 **"运行 ' 应用 '"**。
 
-在点击 "登录" 或 "注销 **"** 按钮时, 应用的菜单应工作在两个片段**** 之间导航并发生变化。
+在点击 "登录 **" 或 "注销** **"** 按钮时，应用的菜单应工作在两个片段之间导航并发生变化。
 
 ![应用程序的屏幕截图](./images/app-screens.png)

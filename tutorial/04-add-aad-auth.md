@@ -1,32 +1,45 @@
 <!-- markdownlint-disable MD002 MD041 -->
 
-在本练习中, 你将扩展上一练习中的应用程序, 以支持 Azure AD 的身份验证。 若要获取所需的 OAuth 访问令牌以调用 Microsoft Graph, 这是必需的。 为此, 需要将[适用于 Android 的 Microsoft 身份验证库 (MSAL)](https://github.com/AzureAD/microsoft-authentication-library-for-android)集成到应用程序中。
+在本练习中，你将扩展上一练习中的应用程序，以支持 Azure AD 的身份验证。 若要获取所需的 OAuth 访问令牌以调用 Microsoft Graph，这是必需的。 为此，需要将[适用于 Android 的 Microsoft 身份验证库（MSAL）](https://github.com/AzureAD/microsoft-authentication-library-for-android)集成到应用程序中。
 
-1. 右键单击 " **app/res/values** " 文件夹, 然后选择 "**新建**", 然后选择 "**值资源文件**"。
+1. 右键单击 " **res** " 文件夹，然后选择 "**新建**"，然后选择 " **Android 资源目录**"。
 
-1. 命名该文件`oauth_strings` , 然后选择 **"确定"**。
+1. 将**资源类型**更改为`raw` ，然后选择 **"确定"**。
 
-1. 将以下值添加到`resources`元素中。
+1. 右键单击新的**原始**文件夹，然后选择 "**新建**"，然后选择 "**文件**"。
 
-    ```xml
-    <string name="oauth_app_id">YOUR_APP_ID_HERE</string>
-    <string name="oauth_redirect_uri">msalYOUR_APP_ID_HERE</string>
-    <string-array name="oauth_scopes">
-        <item>User.Read</item>
-        <item>Calendars.Read</item>
-    </string-array>
+1. 命名该文件`msal_config.json` ，然后选择 **"确定"**。
+
+1. 将以下项添加到**msal_config 的 json**文件中。
+
+    ```json
+    {
+      "client_id" : "YOUR_APP_ID_HERE",
+      "redirect_uri" : "msauth://YOUR_PACKAGE_NAME_HERE/callback",
+      "broker_redirect_uri_registered": false,
+      "account_mode": "SINGLE",
+      "authorities" : [
+        {
+          "type": "AAD",
+          "audience": {
+            "type": "AzureADandPersonalMicrosoftAccount"
+          },
+          "default": true
+        }
+      ]
+    }
     ```
 
-    将`YOUR_APP_ID_HERE`替换为应用注册中的应用 ID。
+    将`YOUR_APP_ID_HERE`替换为应用注册中的应用 ID，并替换`YOUR_PACKAGE_NAME_HERE`为项目的包名称。
 
 > [!IMPORTANT]
-> 如果您使用的是源代码管理 (如 git), 现在可以从源代码管理中排除`oauth_strings.xml`该文件, 以避免无意中泄漏您的应用程序 ID。
+> 如果您使用的是源代码管理（如 git），现在可以从源代码管理中排除`msal_config.json`该文件，以避免无意中泄漏您的应用程序 ID。
 
 ## <a name="implement-sign-in"></a>实施登录
 
-在本节中, 您将更新清单以允许 MSAL 使用浏览器对用户进行身份验证, 将重定向 URI 注册为应用程序处理, 创建身份验证帮助程序类, 并更新应用程序以进行登录和注销。
+在本节中，您将更新清单以允许 MSAL 使用浏览器对用户进行身份验证，将重定向 URI 注册为应用程序处理，创建身份验证帮助程序类，并更新应用程序以进行登录和注销。
 
-1. 展开 "**应用/清单**" 文件夹, 然后打开 " **androidmanifest.xml**"。 将以下元素添加到`application`元素上方。
+1. 展开 "**应用/清单**" 文件夹，然后打开 " **androidmanifest.xml**"。 将以下元素添加到`application`元素上方。
 
     ```xml
     <uses-permission android:name="android.permission.INTERNET" />
@@ -34,51 +47,63 @@
     ```
 
     > [!NOTE]
-    > 为了使 MSAL 库对用户进行身份验证, 需要这些权限。
+    > 为了使 MSAL 库对用户进行身份验证，需要这些权限。
 
-1. 在`application`元素中添加以下元素。
+1. 将以下元素添加到`application`元素中，将`YOUR_PACKAGE_NAME_HERE`字符串替换为您的包名称。
 
     ```xml
-    <activity android:name="com.microsoft.identity.client.BrowserTabActivity">
+    <!--Intent filter to capture authorization code response from the default browser on the
+        device calling back to the app after interactive sign in -->
+    <activity
+        android:name="com.microsoft.identity.client.BrowserTabActivity">
         <intent-filter>
             <action android:name="android.intent.action.VIEW" />
-
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
-
             <data
-                android:host="auth"
-                android:scheme="@string/oauth_redirect_uri" />
+                android:scheme="msauth"
+                android:host="YOUR_PACKAGE_NAME_HERE"
+                android:path="/callback" />
         </intent-filter>
     </activity>
     ```
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹, 然后选择 "**新建**", 然后依次选择 " **java 类**"。 命名该类`AuthenticationHelper`并选择 **"确定"**。
+1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。 命名该类`AuthenticationHelper`并选择 **"确定"**。
 
-1. 打开新文件, 并将其内容替换为以下内容。
+1. 打开新文件，并将其内容替换为以下内容。
 
     ```java
     package com.example.graphtutorial;
 
     import android.app.Activity;
     import android.content.Context;
-    import android.content.Intent;
-
+    import android.util.Log;
     import com.microsoft.identity.client.AuthenticationCallback;
-    import com.microsoft.identity.client.IAccount;
+    import com.microsoft.identity.client.IPublicClientApplication;
+    import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
     import com.microsoft.identity.client.PublicClientApplication;
+    import com.microsoft.identity.client.exception.MsalException;
 
     // Singleton class - the app only needs a single instance
     // of PublicClientApplication
     public class AuthenticationHelper {
         private static AuthenticationHelper INSTANCE = null;
-        private PublicClientApplication mPCA = null;
-        private String[] mScopes;
+        private ISingleAccountPublicClientApplication mPCA = null;
+        private String[] mScopes = { "User.Read", "Calendars.Read" };
 
         private AuthenticationHelper(Context ctx) {
-            String appId = ctx.getResources().getString(R.string.oauth_app_id);
-            mScopes = ctx.getResources().getStringArray(R.array.oauth_scopes);
-            mPCA = new PublicClientApplication(ctx, appId);
+            PublicClientApplication.createSingleAccountPublicClientApplication(ctx, R.raw.msal_config,
+                new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
+                    @Override
+                    public void onCreated(ISingleAccountPublicClientApplication application) {
+                        mPCA = application;
+                    }
+
+                    @Override
+                    public void onError(MsalException exception) {
+                        Log.e("AUTHHELPER", "Error creating MSAL application", exception);
+                    }
+                });
         }
 
         public static synchronized AuthenticationHelper getInstance(Context ctx) {
@@ -94,45 +119,45 @@
         public static synchronized AuthenticationHelper getInstance() {
             if (INSTANCE == null) {
                 throw new IllegalStateException(
-                        "AuthenticationHelper has not been initialized from MainActivity");
+                    "AuthenticationHelper has not been initialized from MainActivity");
             }
 
             return INSTANCE;
         }
 
-        public boolean hasAccount() {
-            return !mPCA.getAccounts().isEmpty();
-        }
-
-        public void handleRedirect(int requestCode, int resultCode, Intent data) {
-            mPCA.handleInteractiveRequestRedirect(requestCode, resultCode, data);
-        }
-
         public void acquireTokenInteractively(Activity activity, AuthenticationCallback callback) {
-            mPCA.acquireToken(activity, mScopes, callback);
+            mPCA.signIn(activity, null, mScopes, callback);
         }
 
         public void acquireTokenSilently(AuthenticationCallback callback) {
-            mPCA.acquireTokenSilentAsync(mScopes, mPCA.getAccounts().get(0), callback);
+            // Get the authority from MSAL config
+            String authority = mPCA.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
+            mPCA.acquireTokenSilentAsync(mScopes, authority, callback);
         }
 
         public void signOut() {
-            for (IAccount account : mPCA.getAccounts()) {
-                mPCA.removeAccount(account);
-            }
+            mPCA.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
+                @Override
+                public void onSignOut() {
+                    Log.d("AUTHHELPER", "Signed out");
+                }
+
+                @Override
+                public void onError(@NonNull MsalException exception) {
+                    Log.d("AUTHHELPER", "MSAL error signing out", exception);
+                }
+            });
         }
     }
     ```
 
-1. 打开**MainActivity** , 并添加以下`import`语句。
+1. 打开**MainActivity** ，并添加以下`import`语句。
 
     ```java
-    import android.content.Intent;
-    import android.support.annotation.Nullable;
     import android.util.Log;
 
     import com.microsoft.identity.client.AuthenticationCallback;
-    import com.microsoft.identity.client.AuthenticationResult;
+    import com.microsoft.identity.client.IAuthenticationResult;
     import com.microsoft.identity.client.exception.MsalClientException;
     import com.microsoft.identity.client.exception.MsalException;
     import com.microsoft.identity.client.exception.MsalServiceException;
@@ -150,17 +175,6 @@
     ```java
     // Get the authentication helper
     mAuthHelper = AuthenticationHelper.getInstance(getApplicationContext());
-    ```
-
-1. 添加用于处理身份`onActivityResult`验证响应的替代。
-
-    ```java
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        mAuthHelper.handleRedirect(requestCode, resultCode, data);
-    }
     ```
 
 1. 将以下函数添加到`MainActivity`类中。
@@ -182,7 +196,7 @@
         return new AuthenticationCallback() {
 
             @Override
-            public void onSuccess(AuthenticationResult authenticationResult) {
+            public void onSuccess(IAuthenticationResult authenticationResult) {
                 // Log the token for debug purposes
                 String accessToken = authenticationResult.getAccessToken();
                 Log.d("AUTH", String.format("Access token: %s", accessToken));
@@ -200,8 +214,13 @@
                     doInteractiveSignIn();
 
                 } else if (exception instanceof MsalClientException) {
-                    // Exception inside MSAL, more info inside MsalError.java
-                    Log.e("AUTH", "Client error authenticating", exception);
+                    if (exception.getErrorCode() == "no_current_account") {
+                        Log.d("AUTH", "No current account, interactive login required");
+                        doInteractiveSignIn();
+                    } else {
+                        // Exception inside MSAL, more info inside MsalError.java
+                        Log.e("AUTH", "Client error authenticating", exception);
+                    }
                 } else if (exception instanceof MsalServiceException) {
                     // Exception when communicating with the auth server, likely config issue
                     Log.e("AUTH", "Service error authenticating", exception);
@@ -224,11 +243,10 @@
     ```java
     private void signIn() {
         showProgressBar();
-        if (mAuthHelper.hasAccount()) {
-            doSilentSignIn();
-        } else {
-            doInteractiveSignIn();
-        }
+        // Attempt silent sign in first
+        // if this fails, the callback will handle doing
+        // interactive sign in
+        doSilentSignIn();
     }
 
     private void signOut() {
@@ -240,25 +258,25 @@
     ```
 
     > [!NOTE]
-    > 请注意, `signIn`该方法首先检查 MSAL 缓存中是否已有用户帐户。 如果有, 它会尝试以静默方式刷新其令牌, 从而避免在每次启动应用程序时提示用户。
+    > 请注意， `signIn`该方法首先检查 MSAL 缓存中是否已有用户帐户。 如果有，它会尝试以静默方式刷新其令牌，从而避免在每次启动应用程序时提示用户。
 
 1. 保存更改并运行该应用程序。
 
-1. 点击 "**登录**" 菜单项时, 会打开 "Azure AD 登录" 页的浏览器。 使用你的帐户登录。
+1. 点击 "**登录**" 菜单项时，会打开 "Azure AD 登录" 页的浏览器。 使用你的帐户登录。
 
-在应用程序恢复后, 您应该会看到在 Android Studio 的调试日志中打印的访问令牌。
+在应用程序恢复后，您应该会看到在 Android Studio 的调试日志中打印的访问令牌。
 
 ![Android Studio 中的 Logcat 窗口的屏幕截图](./images/debugger-access-token.png)
 
 ## <a name="get-user-details"></a>获取用户详细信息
 
-在本节中, 您将创建帮助程序类以保存对 Microsoft Graph 的所有调用, 并更新`MainActivity`类以使用此新类获取已登录的用户。
+在本节中，您将创建帮助程序类以保存对 Microsoft Graph 的所有调用，并更新`MainActivity`类以使用此新类获取已登录的用户。
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹, 然后选择 "**新建**", 然后依次选择 " **java 类**"。
+1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。
 
 1. 命名该类`GraphHelper`并选择 **"确定"**。
 
-1. 打开新文件, 并将其内容替换为以下内容。
+1. 打开新文件，并将其内容替换为以下内容。
 
     ```java
     package com.example.graphtutorial;
@@ -311,7 +329,7 @@
     > 请考虑此代码执行的操作。
     >
     > - 它实现`IAuthenticationProvider`接口以在传出 HTTP 请求的`Authorization`标头中插入访问令牌。
-    > - 它公开了`getUser`一个函数, 用于从`/me` Graph 终结点获取已登录用户的信息。
+    > - 它公开了`getUser`一个函数，用于从`/me` Graph 终结点获取已登录用户的信息。
 
 1. 将以下`import`语句添加到**MainActivity**文件的顶部。
 
@@ -322,7 +340,7 @@
     import com.microsoft.graph.models.extensions.User;
     ```
 
-1. 将以下函数添加到`MainActivity`类中, 以生成`ICallback`用于图形调用的。
+1. 将以下函数添加到`MainActivity`类中，以生成`ICallback`用于图形调用的。
 
     ```java
     private ICallback<User> getUserCallback() {
@@ -366,7 +384,7 @@
     }
     ```
 
-1. 删除设置用户名和电子邮件的以下行:
+1. 删除设置用户名和电子邮件的以下行：
 
     ```java
     // For testing
@@ -389,4 +407,4 @@
     }
     ```
 
-如果您现在保存更改并运行应用程序, 则在使用用户的显示名称和电子邮件地址更新 UI 后, 登录 UI。
+如果您现在保存更改并运行应用程序，则在使用用户的显示名称和电子邮件地址更新 UI 后，登录 UI。
