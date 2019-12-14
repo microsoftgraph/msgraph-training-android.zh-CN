@@ -258,7 +258,7 @@
     ```
 
     > [!NOTE]
-    > 请注意， `signIn`该方法首先检查 MSAL 缓存中是否已有用户帐户。 如果有，它会尝试以静默方式刷新其令牌，从而避免在每次启动应用程序时提示用户。
+    > 请注意， `signIn`此方法将执行静默式登录（通过`doSilentSignIn`）。 如果缄默登录失败，此方法的回调将执行交互式登录。 这样就不必在每次启动应用程序时提示用户。
 
 1. 保存更改并运行该应用程序。
 
@@ -396,7 +396,7 @@
 
     ```java
     @Override
-    public void onSuccess(AuthenticationResult authenticationResult) {
+    public void onSuccess(IAuthenticationResult authenticationResult) {
         // Log the token for debug purposes
         String accessToken = authenticationResult.getAccessToken();
         Log.d("AUTH", String.format("Access token: %s", accessToken));
