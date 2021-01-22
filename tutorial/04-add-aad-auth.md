@@ -1,45 +1,29 @@
 <!-- markdownlint-disable MD002 MD041 -->
 
-在本练习中，你将扩展上一练习中的应用程序，以支持 Azure AD 的身份验证。 若要获取所需的 OAuth 访问令牌以调用 Microsoft Graph，这是必需的。 为此，需要将[适用于 Android 的 Microsoft 身份验证库（MSAL）](https://github.com/AzureAD/microsoft-authentication-library-for-android)集成到应用程序中。
+在此练习中，你将扩展上一练习中的应用程序，以支持使用 Azure AD 进行身份验证。 这是获取调用 Microsoft Graph 所需的 OAuth 访问令牌所必需的。 为此，你将 Microsoft 身份验证库 [ (MSAL](https://github.com/AzureAD/microsoft-authentication-library-for-android)) Android 集成到应用程序中。
 
-1. 右键单击 " **res** " 文件夹，然后选择 "**新建**"，然后选择 " **Android 资源目录**"。
+1. 右键单击 **res** 文件夹，然后选择 **"新建**"，然后选择 **"Android 资源目录"。**
 
-1. 将**资源类型**更改为`raw` ，然后选择 **"确定"**。
+1. 将资源 **类型更改为并选择** `raw` "**确定"。**
 
-1. 右键单击新的**原始**文件夹，然后选择 "**新建**"，然后选择 "**文件**"。
+1. 右键单击新的 **原始** 文件夹，然后选择 **"新建**"，然后选择"**文件"。**
 
-1. 命名该文件`msal_config.json` ，然后选择 **"确定"**。
+1. 命名文件 `msal_config.json` ，然后选择"**确定"。**
 
-1. 将以下项添加到**msal_config 的 json**文件中。
+1. 将以下内容添加到文件msal_config.js **文件** 。
 
-    ```json
-    {
-      "client_id" : "YOUR_APP_ID_HERE",
-      "redirect_uri" : "msauth://YOUR_PACKAGE_NAME_HERE/callback",
-      "broker_redirect_uri_registered": false,
-      "account_mode": "SINGLE",
-      "authorities" : [
-        {
-          "type": "AAD",
-          "audience": {
-            "type": "AzureADandPersonalMicrosoftAccount"
-          },
-          "default": true
-        }
-      ]
-    }
-    ```
+    :::code language="json" source="../demo/GraphTutorial/msal_config.json.example":::
 
-    将`YOUR_APP_ID_HERE`替换为应用注册中的应用 ID，并替换`YOUR_PACKAGE_NAME_HERE`为项目的包名称。
+1. 替换为 `YOUR_APP_ID_HERE` 应用注册的应用 ID，并替换为 `com.example.graphtutorial` 项目的程序包名称。
 
-> [!IMPORTANT]
-> 如果您使用的是源代码管理（如 git），现在可以从源代码管理中排除`msal_config.json`该文件，以避免无意中泄漏您的应用程序 ID。
+    > [!IMPORTANT]
+    > 如果你使用的是源代码管理（如 git），那么现在应该将文件从源代码管理中排除，以避免意外泄露 `msal_config.json` 应用 ID。
 
-## <a name="implement-sign-in"></a>实施登录
+## <a name="implement-sign-in"></a>实现登录
 
-在本节中，您将更新清单以允许 MSAL 使用浏览器对用户进行身份验证，将重定向 URI 注册为应用程序处理，创建身份验证帮助程序类，并更新应用程序以进行登录和注销。
+在此部分中，你将更新清单以允许 MSAL 使用浏览器对用户进行身份验证、将重定向 URI 注册为由应用处理、创建身份验证帮助程序类，以及更新应用以登录和注销。
 
-1. 展开 "**应用/清单**" 文件夹，然后打开 " **androidmanifest.xml**"。 将以下元素添加到`application`元素上方。
+1. 展开 **应用/清单** 文件夹 **并打开** AndroidManifest.xml。 在元素上方添加以下 `application` 元素。
 
     ```xml
     <uses-permission android:name="android.permission.INTERNET" />
@@ -47,9 +31,9 @@
     ```
 
     > [!NOTE]
-    > 为了使 MSAL 库对用户进行身份验证，需要这些权限。
+    > MSAL 库需要这些权限才能对用户进行身份验证。
 
-1. 将以下元素添加到`application`元素中，将`YOUR_PACKAGE_NAME_HERE`字符串替换为您的包名称。
+1. 在元素中添加以下元素， `application` 将 `YOUR_PACKAGE_NAME_HERE` 字符串替换为程序包名称。
 
     ```xml
     <!--Intent filter to capture authorization code response from the default browser on the
@@ -68,90 +52,19 @@
     </activity>
     ```
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。 命名该类`AuthenticationHelper`并选择 **"确定"**。
+1. 右键单击 **app/java/com.example.graphtu一l** 文件夹，然后选择"新建 **"，Java类**。 将 **类型更改为****接口**。 命名接口 `IAuthenticationHelperCreatedListener` ，然后选择"**确定"。**
 
 1. 打开新文件，并将其内容替换为以下内容。
 
-    ```java
-    package com.example.graphtutorial;
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/IAuthenticationHelperCreatedListener.java" id="ListenerSnippet":::
 
-    import android.app.Activity;
-    import android.content.Context;
-    import android.util.Log;
-    import com.microsoft.identity.client.AuthenticationCallback;
-    import com.microsoft.identity.client.IPublicClientApplication;
-    import com.microsoft.identity.client.ISingleAccountPublicClientApplication;
-    import com.microsoft.identity.client.PublicClientApplication;
-    import com.microsoft.identity.client.exception.MsalException;
+1. 右键单击 **app/java/com.example.graphtu一l** 文件夹，然后选择"新建 **"，Java类**。 命名类 `AuthenticationHelper` ，然后选择"**确定"。**
 
-    // Singleton class - the app only needs a single instance
-    // of PublicClientApplication
-    public class AuthenticationHelper {
-        private static AuthenticationHelper INSTANCE = null;
-        private ISingleAccountPublicClientApplication mPCA = null;
-        private String[] mScopes = { "User.Read", "Calendars.Read" };
+1. 打开新文件，并将其内容替换为以下内容。
 
-        private AuthenticationHelper(Context ctx) {
-            PublicClientApplication.createSingleAccountPublicClientApplication(ctx, R.raw.msal_config,
-                new IPublicClientApplication.ISingleAccountApplicationCreatedListener() {
-                    @Override
-                    public void onCreated(ISingleAccountPublicClientApplication application) {
-                        mPCA = application;
-                    }
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/AuthenticationHelper.java" id="AuthHelperSnippet":::
 
-                    @Override
-                    public void onError(MsalException exception) {
-                        Log.e("AUTHHELPER", "Error creating MSAL application", exception);
-                    }
-                });
-        }
-
-        public static synchronized AuthenticationHelper getInstance(Context ctx) {
-            if (INSTANCE == null) {
-                INSTANCE = new AuthenticationHelper(ctx);
-            }
-
-            return INSTANCE;
-        }
-
-        // Version called from fragments. Does not create an
-        // instance if one doesn't exist
-        public static synchronized AuthenticationHelper getInstance() {
-            if (INSTANCE == null) {
-                throw new IllegalStateException(
-                    "AuthenticationHelper has not been initialized from MainActivity");
-            }
-
-            return INSTANCE;
-        }
-
-        public void acquireTokenInteractively(Activity activity, AuthenticationCallback callback) {
-            mPCA.signIn(activity, null, mScopes, callback);
-        }
-
-        public void acquireTokenSilently(AuthenticationCallback callback) {
-            // Get the authority from MSAL config
-            String authority = mPCA.getConfiguration().getDefaultAuthority().getAuthorityURL().toString();
-            mPCA.acquireTokenSilentAsync(mScopes, authority, callback);
-        }
-
-        public void signOut() {
-            mPCA.signOut(new ISingleAccountPublicClientApplication.SignOutCallback() {
-                @Override
-                public void onSignOut() {
-                    Log.d("AUTHHELPER", "Signed out");
-                }
-
-                @Override
-                public void onError(@NonNull MsalException exception) {
-                    Log.d("AUTHHELPER", "MSAL error signing out", exception);
-                }
-            });
-        }
-    }
-    ```
-
-1. 打开**MainActivity** ，并添加以下`import`语句。
+1. 打开 **MainActivity** 并添加以下 `import` 语句。
 
     ```java
     import android.util.Log;
@@ -164,25 +77,24 @@
     import com.microsoft.identity.client.exception.MsalUiRequiredException;
     ```
 
-1. 将以下成员属性添加到`MainActivity`类中。
+1. 将以下成员属性添加到 `MainActivity` 类。
 
     ```java
     private AuthenticationHelper mAuthHelper = null;
+    private boolean mAttemptInteractiveSignIn = false;
     ```
 
-1. 将以下项添加到`onCreate`函数的末尾。
+1. 将以下代码添加到`onCreate` 函数末尾。
 
-    ```java
-    // Get the authentication helper
-    mAuthHelper = AuthenticationHelper.getInstance(getApplicationContext());
-    ```
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/MainActivity.java" id="InitialLoginSnippet":::
 
-1. 将以下函数添加到`MainActivity`类中。
+1. 将以下函数添加到 `MainActivity` 类。
 
     ```java
     // Silently sign in - used if there is already a
     // user account in the MSAL cache
-    private void doSilentSignIn() {
+    private void doSilentSignIn(boolean shouldAttemptInteractive) {
+        mAttemptInteractiveSignIn = shouldAttemptInteractive;
         mAuthHelper.acquireTokenSilently(getAuthCallback());
     }
 
@@ -200,6 +112,7 @@
                 // Log the token for debug purposes
                 String accessToken = authenticationResult.getAccessToken();
                 Log.d("AUTH", String.format("Access token: %s", accessToken));
+
                 hideProgressBar();
 
                 setSignedInState(true);
@@ -211,12 +124,16 @@
                 // Check the type of exception and handle appropriately
                 if (exception instanceof MsalUiRequiredException) {
                     Log.d("AUTH", "Interactive login required");
-                    doInteractiveSignIn();
-
-                } else if (exception instanceof MsalClientException) {
-                    if (exception.getErrorCode() == "no_current_account") {
-                        Log.d("AUTH", "No current account, interactive login required");
+                    if (mAttemptInteractiveSignIn) {
                         doInteractiveSignIn();
+                    }
+                } else if (exception instanceof MsalClientException) {
+                    if (exception.getErrorCode() == "no_current_account" ||
+                        exception.getErrorCode() == "no_account_found") {
+                        Log.d("AUTH", "No current account, interactive login required");
+                        if (mAttemptInteractiveSignIn) {
+                            doInteractiveSignIn();
+                        }
                     } else {
                         // Exception inside MSAL, more info inside MsalError.java
                         Log.e("AUTH", "Client error authenticating", exception);
@@ -238,43 +155,26 @@
     }
     ```
 
-1. 将现有`signIn`和`signOut`函数替换为以下项。
+1. 将现有 `signIn` 函数 `signOut` 和函数替换为以下内容。
 
-    ```java
-    private void signIn() {
-        showProgressBar();
-        // Attempt silent sign in first
-        // if this fails, the callback will handle doing
-        // interactive sign in
-        doSilentSignIn();
-    }
-
-    private void signOut() {
-        mAuthHelper.signOut();
-
-        setSignedInState(false);
-        openHomeFragment(mUserName);
-    }
-    ```
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/MainActivity.java" id="SignInAndOutSnippet":::
 
     > [!NOTE]
-    > 请注意， `signIn`此方法将执行静默式登录（通过`doSilentSignIn`）。 如果缄默登录失败，此方法的回调将执行交互式登录。 这样就不必在每次启动应用程序时提示用户。
+    > 请注意， `signIn` 此方法通过 (执行无提示 `doSilentSignIn`) 。 如果无提示登录失败，此方法的回调将执行交互式登录。 这样可以避免每次用户启动应用时提示用户。
 
 1. 保存更改并运行该应用程序。
 
-1. 点击 "**登录**" 菜单项时，会打开 "Azure AD 登录" 页的浏览器。 使用你的帐户登录。
+1. 点击"登录 **"** 菜单项时，浏览器将打开至 Azure AD 登录页。 使用你的帐户登录。
 
-在应用程序恢复后，您应该会看到在 Android Studio 的调试日志中打印的访问令牌。
+应用恢复后，你应该会看到访问令牌在 Android Studio 的调试日志中打印。
 
-![Android Studio 中的 Logcat 窗口的屏幕截图](./images/debugger-access-token.png)
+![Android Studio 中的 Logcat 窗口屏幕截图](./images/debugger-access-token.png)
 
 ## <a name="get-user-details"></a>获取用户详细信息
 
-在本节中，您将创建帮助程序类以保存对 Microsoft Graph 的所有调用，并更新`MainActivity`类以使用此新类获取已登录的用户。
+在此部分中，你将创建一个帮助程序类来保存对 Microsoft Graph 的所有调用，并更新该类以使用此新类获取 `MainActivity` 登录用户。
 
-1. 右键单击 " **app/java/graphtutorial** " 文件夹，然后选择 "**新建**"，然后依次选择 " **java 类**"。
-
-1. 命名该类`GraphHelper`并选择 **"确定"**。
+1. 右键单击 **app/java/com.example.graphtu一l** 文件夹，然后选择"新建 **"，Java类**。 命名类 `GraphHelper` ，然后选择"**确定"。**
 
 1. 打开新文件，并将其内容替换为以下内容。
 
@@ -320,71 +220,32 @@
             mAccessToken = accessToken;
 
             // GET /me (logged in user)
-            mClient.me().buildRequest().get(callback);
+            mClient.me().buildRequest()
+                    .select("displayName,mail,mailboxSettings,userPrincipalName")
+                    .get(callback);
         }
     }
     ```
 
     > [!NOTE]
-    > 请考虑此代码执行的操作。
+    > 考虑此代码执行哪些功能。
     >
-    > - 它实现`IAuthenticationProvider`接口以在传出 HTTP 请求的`Authorization`标头中插入访问令牌。
-    > - 它公开了`getUser`一个函数，用于从`/me` Graph 终结点获取已登录用户的信息。
+    > - 它实现接口 `IAuthenticationProvider` 以在传出 HTTP 请求的 `Authorization` 标头中插入访问令牌。
+    > - 它公开 `getUser` 了一个函数，用于从 Graph 终结点获取已登录 `/me` 用户的信息。
 
-1. 将以下`import`语句添加到**MainActivity**文件的顶部。
+1. 将以下 `import` 语句添加到 **MainActivity** 文件的顶部。
 
     ```java
     import com.microsoft.graph.concurrency.ICallback;
     import com.microsoft.graph.core.ClientException;
-    import com.microsoft.graph.models.extensions.IGraphServiceClient;
     import com.microsoft.graph.models.extensions.User;
     ```
 
-1. 将以下函数添加到`MainActivity`类中，以生成`ICallback`用于图形调用的。
+1. 将以下函数添加到 `MainActivity` 类以生成 Graph `ICallback` 调用。
 
-    ```java
-    private ICallback<User> getUserCallback() {
-        return new ICallback<User>() {
-            @Override
-            public void success(User user) {
-                Log.d("AUTH", "User: " + user.displayName);
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/MainActivity.java" id="GetUserCallbackSnippet":::
 
-                mUserName = user.displayName;
-                mUserEmail = user.mail == null ? user.userPrincipalName : user.mail;
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        hideProgressBar();
-
-                        setSignedInState(true);
-                        openHomeFragment(mUserName);
-                    }
-                });
-
-            }
-
-            @Override
-            public void failure(ClientException ex) {
-                Log.e("AUTH", "Error getting /me", ex);
-                mUserName = "ERROR";
-                mUserEmail = "ERROR";
-
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        hideProgressBar();
-
-                        setSignedInState(true);
-                        openHomeFragment(mUserName);
-                    }
-                });
-            }
-        };
-    }
-    ```
-
-1. 删除设置用户名和电子邮件的以下行：
+1. 删除以下用于设置用户名和电子邮件的行：
 
     ```java
     // For testing
@@ -392,19 +253,8 @@
     mUserEmail = "meganb@contoso.com";
     ```
 
-1. 将`AuthenticationCallback`中`onSuccess`的替代替换替换为以下项。
+1. 将 `onSuccess` 以下替代 `AuthenticationCallback` 项替换为以下内容。
 
-    ```java
-    @Override
-    public void onSuccess(IAuthenticationResult authenticationResult) {
-        // Log the token for debug purposes
-        String accessToken = authenticationResult.getAccessToken();
-        Log.d("AUTH", String.format("Access token: %s", accessToken));
+    :::code language="java" source="../demo/GraphTutorial/app/src/main/java/com/example/graphtutorial/MainActivity.java" id="OnSuccessSnippet":::
 
-        // Get Graph client and get user
-        GraphHelper graphHelper = GraphHelper.getInstance();
-        graphHelper.getUser(accessToken, getUserCallback());
-    }
-    ```
-
-如果您现在保存更改并运行应用程序，则在使用用户的显示名称和电子邮件地址更新 UI 后，登录 UI。
+1. 保存更改并运行该应用程序。 登录 UI 后，会使用用户的 显示名称 和电子邮件地址进行更新。
