@@ -1,27 +1,22 @@
 <!-- markdownlint-disable MD002 MD041 -->
 
-<span data-ttu-id="8e8df-101">本教程向您介绍如何构建使用 Microsoft Graph API 检索用户的日历信息的 Android 应用程序。</span><span class="sxs-lookup"><span data-stu-id="8e8df-101">This tutorial teaches you how to build an Android app that uses the Microsoft Graph API to retrieve calendar information for a user.</span></span>
+<span data-ttu-id="53e41-101">本教程指导你如何生成使用 Microsoft Graph API 检索用户的日历信息的 Android 应用。</span><span class="sxs-lookup"><span data-stu-id="53e41-101">This tutorial teaches you how to build an Android app that uses the Microsoft Graph API to retrieve calendar information for a user.</span></span>
 
 > [!TIP]
-> <span data-ttu-id="8e8df-102">如果您只想下载已完成的教程，可以下载或克隆[GitHub 存储库](https://github.com/microsoftgraph/msgraph-training-android)。</span><span class="sxs-lookup"><span data-stu-id="8e8df-102">If you prefer to just download the completed tutorial, you can download or clone the [GitHub repository](https://github.com/microsoftgraph/msgraph-training-android).</span></span>
+> <span data-ttu-id="53e41-102">如果你更喜欢仅下载已完成的教程，可以下载或克隆 [GitHub 存储库](https://github.com/microsoftgraph/msgraph-training-android)。</span><span class="sxs-lookup"><span data-stu-id="53e41-102">If you prefer to just download the completed tutorial, you can download or clone the [GitHub repository](https://github.com/microsoftgraph/msgraph-training-android).</span></span>
 
-## <a name="prerequisites"></a><span data-ttu-id="8e8df-103">先决条件</span><span class="sxs-lookup"><span data-stu-id="8e8df-103">Prerequisites</span></span>
+## <a name="prerequisites"></a><span data-ttu-id="53e41-103">先决条件</span><span class="sxs-lookup"><span data-stu-id="53e41-103">Prerequisites</span></span>
 
-<span data-ttu-id="8e8df-104">在开始本教程之前，您应该已在开发计算机上安装了[Android Studio](https://developer.android.com/studio/) 。</span><span class="sxs-lookup"><span data-stu-id="8e8df-104">Before you start this tutorial, you should have [Android Studio](https://developer.android.com/studio/) installed on your development machine.</span></span>
+<span data-ttu-id="53e41-104">在开始本教程之前，应在开发计算机上安装[Android Studio。](https://developer.android.com/studio/)</span><span class="sxs-lookup"><span data-stu-id="53e41-104">Before you start this tutorial, you should have [Android Studio](https://developer.android.com/studio/) installed on your development machine.</span></span>
+
+<span data-ttu-id="53e41-105">你还应该拥有具有邮箱的个人 Microsoft 帐户Outlook.com或 Microsoft 工作或学校帐户。</span><span class="sxs-lookup"><span data-stu-id="53e41-105">You should also have either a personal Microsoft account with a mailbox on Outlook.com, or a Microsoft work or school account.</span></span> <span data-ttu-id="53e41-106">如果你没有 Microsoft 帐户，有几个选项可以获取免费帐户：</span><span class="sxs-lookup"><span data-stu-id="53e41-106">If you don't have a Microsoft account, there are a couple of options to get a free account:</span></span>
+
+- <span data-ttu-id="53e41-107">你可以 [注册新的个人 Microsoft 帐户](https://signup.live.com/signup?wa=wsignin1.0&rpsnv=12&ct=1454618383&rver=6.4.6456.0&wp=MBI_SSL_SHARED&wreply=https://mail.live.com/default.aspx&id=64855&cbcxt=mai&bk=1454618383&uiflavor=web&uaid=b213a65b4fdc484382b6622b3ecaa547&mkt=E-US&lc=1033&lic=1)。</span><span class="sxs-lookup"><span data-stu-id="53e41-107">You can [sign up for a new personal Microsoft account](https://signup.live.com/signup?wa=wsignin1.0&rpsnv=12&ct=1454618383&rver=6.4.6456.0&wp=MBI_SSL_SHARED&wreply=https://mail.live.com/default.aspx&id=64855&cbcxt=mai&bk=1454618383&uiflavor=web&uaid=b213a65b4fdc484382b6622b3ecaa547&mkt=E-US&lc=1033&lic=1).</span></span>
+- <span data-ttu-id="53e41-108">你可以 [注册 Office 365 开发人员计划](https://developer.microsoft.com/office/dev-program) ，获取免费的 Office 365 订阅。</span><span class="sxs-lookup"><span data-stu-id="53e41-108">You can [sign up for the Office 365 Developer Program](https://developer.microsoft.com/office/dev-program) to get a free Office 365 subscription.</span></span>
 
 > [!NOTE]
-> <span data-ttu-id="8e8df-105">本教程是使用 Android Studio 版本3.5.1 和 Android 10.0 SDK 编写的。</span><span class="sxs-lookup"><span data-stu-id="8e8df-105">This tutorial was written with Android Studio version 3.5.1 and the Android 10.0 SDK.</span></span> <span data-ttu-id="8e8df-106">本指南中的步骤可能适用于其他版本，但尚未经过测试。</span><span class="sxs-lookup"><span data-stu-id="8e8df-106">The steps in this guide may work with other versions, but that has not been tested.</span></span>
+> <span data-ttu-id="53e41-109">本教程是使用 Android Studio 版本 4.1.1 和 Android 10.0 SDK 编写的。</span><span class="sxs-lookup"><span data-stu-id="53e41-109">This tutorial was written with Android Studio version 4.1.1 and the Android 10.0 SDK.</span></span> <span data-ttu-id="53e41-110">本指南中的步骤可能与其他版本一起运行，但尚未经过测试。</span><span class="sxs-lookup"><span data-stu-id="53e41-110">The steps in this guide may work with other versions, but that has not been tested.</span></span>
 
-## <a name="watch-the-tutorial"></a><span data-ttu-id="8e8df-107">观看教程</span><span class="sxs-lookup"><span data-stu-id="8e8df-107">Watch the tutorial</span></span>
+## <a name="feedback"></a><span data-ttu-id="53e41-111">反馈</span><span class="sxs-lookup"><span data-stu-id="53e41-111">Feedback</span></span>
 
-<span data-ttu-id="8e8df-108">此模块已记录，在 Office 开发 YouTube 频道中可用。</span><span class="sxs-lookup"><span data-stu-id="8e8df-108">This module has been recorded and is available in the Office Development YouTube channel.</span></span>
-
-<!-- markdownlint-disable MD033 MD034 -->
-<br/>
-
-> [!VIDEO https://www.youtube-nocookie.com/embed/BLmOmv4FSsQ]
-<!-- markdownlint-enable MD033 MD034 -->
-
-## <a name="feedback"></a><span data-ttu-id="8e8df-109">反馈</span><span class="sxs-lookup"><span data-stu-id="8e8df-109">Feedback</span></span>
-
-<span data-ttu-id="8e8df-110">请在[GitHub 存储库](https://github.com/microsoftgraph/msgraph-training-android)中提供有关本教程的任何反馈。</span><span class="sxs-lookup"><span data-stu-id="8e8df-110">Please provide any feedback on this tutorial in the [GitHub repository](https://github.com/microsoftgraph/msgraph-training-android).</span></span>
+<span data-ttu-id="53e41-112">请在 GitHub 存储库中提供有关本教程 [的任何反馈](https://github.com/microsoftgraph/msgraph-training-android)。</span><span class="sxs-lookup"><span data-stu-id="53e41-112">Please provide any feedback on this tutorial in the [GitHub repository](https://github.com/microsoftgraph/msgraph-training-android).</span></span>
